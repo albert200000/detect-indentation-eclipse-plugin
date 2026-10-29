@@ -1,12 +1,10 @@
 package com.example.indentdetective;
 
-import org.eclipse.core.runtime.ILog;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 
 /**
  * The bundle activator registers the {@link IndentListener} with the workbench
@@ -24,9 +22,6 @@ public class Activator extends AbstractUIPlugin {
         plugin = this;
 
         indentListener = new IndentListener();
-
-        ILog log = ILog.of(FrameworkUtil.getBundle(Activator.class));
-        log.info("TEST");
 
         PlatformUI.getWorkbench().getDisplay().asyncExec(() -> {
             IWorkbench workbench = PlatformUI.getWorkbench();
