@@ -7,6 +7,10 @@ public class IndentStartup implements IStartup {
     public void earlyStartup() {
         // Loading this class forces the bundle to activate,
         // so Activator.start() runs.
-        Activator.getDefault();
+        Activator a = Activator.getDefault();
+        if (a == null) {
+            return;
+        }
+        a.registerListeners();
     }
 }

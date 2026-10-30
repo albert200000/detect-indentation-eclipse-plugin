@@ -16,9 +16,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class IndentListener implements IPartListener2 {
 
-    @Override
-    public void partActivated(IWorkbenchPartReference partRef) {
-        IWorkbenchPart part = partRef.getPart(false);
+    /**
+     * Shared core: analyze the editor's document and apply the detected
+     * indentation settings. Used by both the activation-event path and the
+     * startup scan over already-open editors.
+     */
+    public void handlePart(IWorkbenchPart part) {
         if (part instanceof ITextEditor) {
             ITextEditor editor = (ITextEditor) part;
             IDocumentProvider provider = editor.getDocumentProvider();
@@ -33,6 +36,11 @@ public class IndentListener implements IPartListener2 {
                 applyPreferences(editor, result);
             }
         }
+    }
+
+    @Override
+    public void partActivated(IWorkbenchPartReference partRef) {
+        handlePart(partRef.getPart(false));
     }
 
     private void applyPreferences(ITextEditor editor, IndentResult result) {
