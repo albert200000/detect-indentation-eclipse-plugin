@@ -1,7 +1,11 @@
 package com.example.indentdetective;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
@@ -17,6 +21,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
 public class IndentListener implements IPartListener2 {
 
     /**
+     * Caches the indentation analysis per editor input so that switching to an
+     * already-analyzed tab reuses the previous result instead of re-analyzing.
+     */
+    private final Map<IEditorInput, IndentResult> resultCache = new HashMap<>();
+
+    /**
      * Shared core: analyze the editor's document and apply the detected
      * indentation settings. Used by both the activation-event path and the
      * startup scan over already-open editors.
@@ -24,18 +34,31 @@ public class IndentListener implements IPartListener2 {
     public void handlePart(IWorkbenchPart part) {
         if (part instanceof ITextEditor) {
             ITextEditor editor = (ITextEditor) part;
-            IDocumentProvider provider = editor.getDocumentProvider();
-
-            if (provider == null || editor.getEditorInput() == null) {
+            IEditorInput input = editor.getEditorInput();
+            if (input == null) {
                 return;
             }
 
-            IDocument document = provider.getDocument(editor.getEditorInput());
+            IDocumentProvider provider = editor.getDocumentProvider();
+            if (provider == null) {
+                return;
+            }
+
+            IDocument document = provider.getDocument(input);
             if (document != null) {
-                IndentResult result = IndentDetective.analyze(document);
+                IndentResult result = getOrCreateResult(input, document);
                 applyPreferences(editor, result);
             }
         }
+    }
+
+    private IndentResult getOrCreateResult(IEditorInput input, IDocument document) {
+        IndentResult cached = resultCache.get(input);
+        if (cached == null) {
+            cached = IndentDetective.analyze(document);
+            resultCache.put(input, cached);
+        }
+        return cached;
     }
 
     @Override
