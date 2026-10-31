@@ -1,5 +1,6 @@
 package com.example.indentdetective;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -29,7 +30,9 @@ public class Activator extends AbstractUIPlugin {
         IWorkbench workbench = PlatformUI.getWorkbench();
         if (workbench == null) return;
 
-        // 1. Listen for future windows opening/closing
+        // 1. Listen for windows opening/closing. The first windowOpened event
+        //    (during startup) is the cold-start signal: the window and its
+        //    restored editors now exist, so we can scan them.
         windowListener = new IWindowListener() {
             @Override
             public void windowActivated(IWorkbenchWindow window) {}
@@ -49,18 +52,35 @@ public class Activator extends AbstractUIPlugin {
                 if (window.getPartService() != null) {
                     window.getPartService().addPartListener(indentListener);
                 }
+                // Give the newly opened window one more event-loop turn to
+                // finish restoring its parts, then scan its editors.
+                Display.getDefault().asyncExec(() -> scanOpenEditors(workbench));
             }
         };
         workbench.addWindowListener(windowListener);
 
-        // 2. Attach to all *already existing* windows right now
+        // 2. Fallback: windows that already exist right now (e.g. the plugin
+        //    was activated late). The part listener is attached immediately;
+        //    the scan is deferred by one event-loop turn so that any editors
+        //    still being restored are fully initialized when we look at them.
         for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
             if (window.getPartService() != null) {
                 window.getPartService().addPartListener(indentListener);
             }
-            // Cover the cold-start case: editors already open at startup were
-            // created+activated *before* this listener was attached, so no
-            // partActivated event fired for them. Scan them directly.
+        }
+        if (workbench.getWorkbenchWindows().length > 0) {
+            Display.getDefault().asyncExec(() -> scanOpenEditors(workbench));
+        }
+    }
+
+    /**
+     * Applies the indentation analysis to every already-open text editor in
+     * every window, covering editors that were restored before listeners were
+     * attached (no partActivated event fired for them).
+     * Must run on the UI thread.
+     */
+    private void scanOpenEditors(IWorkbench workbench) {
+        for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
             for (IWorkbenchPage page : window.getPages()) {
                 for (IEditorPart editor : page.getEditors()) {
                     if (editor instanceof ITextEditor) {
@@ -79,16 +99,20 @@ public class Activator extends AbstractUIPlugin {
                 // Remove window listener
                 if (windowListener != null) {
                     workbench.removeWindowListener(windowListener);
+                    windowListener = null;
                 }
 
                 // Remove part listener from all open windows
-                for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
-                    if (window.getPartService() != null && indentListener != null) {
-                        window.getPartService().removePartListener(indentListener);
+                if (indentListener != null) {
+                    for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
+                        if (window.getPartService() != null) {
+                            window.getPartService().removePartListener(indentListener);
+                        }
                     }
                 }
             }
         }
+        indentListener = null;
         plugin = null;
         super.stop(context);
     }
