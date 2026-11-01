@@ -32,7 +32,7 @@ public class Activator extends AbstractUIPlugin {
 
         // 1. Listen for windows opening/closing. The first windowOpened event
         //    (during startup) is the cold-start signal: the window and its
-        //    restored editors now exist, so we can scan them.
+        //    restored editors now exist, so we can analyze the active editor.
         windowListener = new IWindowListener() {
             @Override
             public void windowActivated(IWorkbenchWindow window) {}
@@ -53,39 +53,38 @@ public class Activator extends AbstractUIPlugin {
                     window.getPartService().addPartListener(indentListener);
                 }
                 // Give the newly opened window one more event-loop turn to
-                // finish restoring its parts, then scan its editors.
-                Display.getDefault().asyncExec(() -> scanOpenEditors(workbench));
+                // finish restoring its parts, then handle its active editor.
+                Display.getDefault().asyncExec(() -> handleActiveEditors(workbench));
             }
         };
         workbench.addWindowListener(windowListener);
 
         // 2. Fallback: windows that already exist right now (e.g. the plugin
-        //    was activated late). The part listener is attached immediately;
-        //    the scan is deferred by one event-loop turn so that any editors
-        //    still being restored are fully initialized when we look at them.
+        //    was activated late). Attach part listeners immediately; the
+        //    active-editor handling is deferred by one event-loop turn so
+        //    editors still being restored are fully initialized.
         for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
             if (window.getPartService() != null) {
                 window.getPartService().addPartListener(indentListener);
             }
         }
         if (workbench.getWorkbenchWindows().length > 0) {
-            Display.getDefault().asyncExec(() -> scanOpenEditors(workbench));
+            Display.getDefault().asyncExec(() -> handleActiveEditors(workbench));
         }
     }
 
     /**
-     * Applies the indentation analysis to every already-open text editor in
-     * every window, covering editors that were restored before listeners were
-     * attached (no partActivated event fired for them).
+     * Handles the ACTIVE editor of each page, covering editors that were
+     * restored before listeners were attached (no partActivated event fired
+     * for them). Only the active editor drives the indentation settings.
      * Must run on the UI thread.
      */
-    private void scanOpenEditors(IWorkbench workbench) {
+    private void handleActiveEditors(IWorkbench workbench) {
         for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
             for (IWorkbenchPage page : window.getPages()) {
-                for (IEditorPart editor : page.getEditors()) {
-                    if (editor instanceof ITextEditor) {
-                        indentListener.handlePart(editor);
-                    }
+                IEditorPart active = page.getActiveEditor();
+                if (active instanceof ITextEditor) {
+                    indentListener.handlePart(active);
                 }
             }
         }
