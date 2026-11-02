@@ -1,4 +1,4 @@
-package com.example.indentdetective;
+package org.albert200000.detectindentation;
 
 /**
  * Immutable result of the indentation analysis.

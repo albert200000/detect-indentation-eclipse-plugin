@@ -1,4 +1,4 @@
-package com.example.indentdetective;
+package org.albert200000.detectindentation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -55,7 +55,7 @@ public class IndentListener implements IPartListener2 {
     private IndentResult getOrCreateResult(IEditorInput input, IDocument document) {
         IndentResult cached = resultCache.get(input);
         if (cached == null) {
-            cached = IndentDetective.analyze(document);
+            cached = DetectIndentation.analyze(document);
             resultCache.put(input, cached);
         }
         return cached;

@@ -9,4 +9,4 @@ applies the detected settings — tabs vs. spaces and the indentation width — 
 ## Build & test
 
 The project is an Eclipse PDE plug-in with Java. Build and run tests from Eclipse (or use the
-standard PDE build). The unit tests cover `IndentDetective` and `IndentResult`.
+standard PDE build). The unit tests cover `DetectIndentation` and `IndentResult`.

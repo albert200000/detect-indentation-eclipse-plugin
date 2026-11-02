@@ -9,10 +9,10 @@ applies the detected settings — tabs vs. spaces and the indentation width — 
 ## How it works
 
 The plugin registers a workbench listener that fires on editor activation and on window opening.
-For every active `ITextEditor` it runs the core heuristic (`IndentDetective`) against the editor's
+For every active `ITextEditor` it runs the core heuristic (`DetectIndentation`) against the editor's
 document and writes the result into the shared `EditorsUI` preference store:
 
-- **`IndentDetective`** — the core detection logic. It scans up to 150 non-empty lines, counting
+- **`DetectIndentation`** — the core detection logic. It scans up to 150 non-empty lines, counting
   tab-indented vs. space-indented lines and voting on the space-indent *diff* (jump between
   consecutive indent levels). Standard widths (2, 3, 4, 6, 8) are considered. The result is a
   `IndentResult` holding `useSpaces` and the detected `tabWidth`.

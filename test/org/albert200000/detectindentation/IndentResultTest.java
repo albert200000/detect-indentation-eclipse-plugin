@@ -1,4 +1,4 @@
-package com.example.indentdetective;
+package org.albert200000.detectindentation;
 
 import static org.junit.Assert.assertEquals;
 

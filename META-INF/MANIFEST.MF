@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Detect Indentation
-Bundle-SymbolicName: com.example.indentdetective;singleton:=true
-Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: com.example.indentdetective.Activator
+Bundle-SymbolicName: org.albert200000.detectindentation;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-Activator: org.albert200000.detectindentation.Activator
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
  org.eclipse.jface.text,

@@ -1,4 +1,4 @@
-package com.example.indentdetective;
+package org.albert200000.detectindentation;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -14,10 +14,9 @@ import java.util.Set;
  * Core detection logic.
  *
  * Runs heuristic scoring on the line prefixes of a document to infer the
- * indentation settings (tabs vs. spaces and the indentation width), modeled
- * faithfully after the functionality of atom-indent-detective (Pulsar editor).
+ * indentation settings (tabs vs. spaces and the indentation width).
  */
-public class IndentDetective {
+public class DetectIndentation {
 
     private static final int MAX_LINES_TO_CHECK = 150;
     private static final Set<Integer> POSSIBLE_INDENTATIONS = new HashSet<>(Arrays.asList(2, 3, 4, 6, 8));

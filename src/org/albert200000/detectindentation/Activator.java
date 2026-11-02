@@ -1,4 +1,4 @@
-package com.example.indentdetective;
+package org.albert200000.detectindentation;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
